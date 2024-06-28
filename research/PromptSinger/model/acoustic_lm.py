@@ -383,7 +383,7 @@ class AcousticLMT5Configured(BaseFairseqModel):
 
     def forward(self, src_tokens, **kwargs):
         device = src_tokens.device
-        batch_size, t = src_tokens.size()
+        batch_size, t = src_tokens.size() #batch size, num tokens per batch
         
         global_bytes_embedded, idx_local, masks = self.prepare_input(src_tokens, kwargs['target_acoustic_mask'])
         global_in = rearrange(global_bytes_embedded, "b (t p) e -> b t (p e)", p=self.patch_size) # cat along p
@@ -429,6 +429,7 @@ class AcousticLMT5Configured(BaseFairseqModel):
     
     
     def prepare_input(self, idx, masks):
+        #pad=0; patch_size=3 (num codebooks); 
         padding_global = idx.new(idx.shape[0], self.patch_size).fill_(self.pad) # using pad to fill
         bytes_global = torch.cat((padding_global, idx[:, : -self.patch_size]), -1) # set a padding to the first patch
         bytes_input = rearrange(idx, "b (t p) -> (b t) p", p=self.patch_size) 
